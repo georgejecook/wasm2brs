@@ -11,3 +11,8 @@ add_executable(wasm2brs src/wasm2brs.cc src/brs-writer.cc)
 
 add_dependencies(wasm2brs wabt)
 target_link_libraries(wasm2brs wabt)
+
+set(CMAKE_CXX_STANDARD 14)  # Update to C++14
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
