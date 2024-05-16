@@ -72,6 +72,11 @@ sub Main()
         m.CustomInit()
     End if
 
+    'read js from file
+    js = ReadAsciiFile("pkg:/source/main.js")
+    ? " LOADING JS " js
+
+    external_append_stdin(js)
     If settings.RestartOnFailure = True Then
         While True
             CatchingStart()
