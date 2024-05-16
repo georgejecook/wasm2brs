@@ -1,92 +1,102 @@
 ' Copyright 2020, Trevor Sundberg. See LICENSE.md
-Function custom_print_line(fd as Integer, str as String) as Void
-    If m.screen <> Invalid Then
-        Return
-    End If
-    m.outputLines.Push(str)
-    If m.outputLines.Count() > m.output.maxLines Then
-        m.outputLines.Shift()
-    End If
-    m.output.text = m.outputLines.Join(Chr(10))
-End Function
+function custom_print_line(fd as integer, str as string) as void
+  if m.screen <> invalid then
+    return
+  end if
+  m.outputLines.Push(str)
+  if m.outputLines.Count() > m.output.maxLines then
+    m.outputLines.Shift()
+  end if
+  m.output.text = m.outputLines.Join(Chr(10))
+end function
 
-Function WaitForEvent()
-    msg = wait(0, m.port)
-    If msg <> Invalid Then
-        msgType = type(msg)
+function WaitForEvent()
+  msg = wait(0, m.port)
+  if msg <> invalid then
+    msgType = type(msg)
 
-        If msgType = "roSGNodeEvent" Then
-            If msg.getNode() = "enter" Then
-                external_append_stdin(m.keyboard.text + Chr(10))
-                m.keyboard.text = ""
-            Else
-            End If
-        End If
-    End If
-End Function
+    if msgType = "roSGNodeEvent" then
+      if msg.getNode() = "enter" then
+        if m.isJSLoaded <> true
+          'read js from file
+          js = ReadAsciiFile("pkg:/source/main.js")
+          ? " LOADING JS " js
+          external_append_stdin(js  + Chr(10))
+          m.isJSLoaded = true
+        end if
+        ? "RUNNING COMMAND"
+        external_append_stdin(m.keyboard.text + Chr(10))
+        m.keyboard.text = ""
+      else
+      end if
+    end if
+  end if
+end function
 
-Function custom_wait_for_stdin() as Void
-    If m.screen <> Invalid Then
-        Return
-    End If
-    ' This works because we only have the stdin keyboard event
-    WaitForEvent()
-End Function
+function custom_wait_for_stdin() as void
+  if m.screen <> invalid then
+    return
+  end if
+  ' This works because we only have the stdin keyboard event
+  WaitForEvent()
+end function
 
-Function CatchingStart()
-    Try
-        Start()
-    Catch e
-        Print e
-    End Try
-EndFunction
+function CatchingStart()
+  try
+    Start()
+  catch e
+    print e
+  end try
+end function
 
 sub Main()
-    settings = {}
-    Try
-        settings = GetSettings()
-    Catch e
-    End Try
+  settings = {}
+  try
+    settings = GetSettings()
+  catch e
+  end try
 
-    m.port = CreateObject("roMessagePort")
+  m.port = CreateObject("roMessagePort")
 
-    sgScreen = CreateObject("roSGScreen")
-    sgScreen.SetMessagePort(m.port)
-    scene = sgScreen.CreateScene("main")
-    sgScreen.show()
+  sgScreen = CreateObject("roSGScreen")
+  sgScreen.SetMessagePort(m.port)
+  scene = sgScreen.CreateScene("main")
+  sgScreen.show()
 
-    m.keyboard = scene.findNode("keyboard")
-    m.keyboard.setFocus(True)
+  m.keyboard = scene.findNode("keyboard")
+  m.keyboard.setFocus(True)
 
-    scene.findNode("enter").observeField("buttonSelected", m.port)
+  scene.findNode("enter").observeField("buttonSelected", m.port)
 
-    m.output = scene.findNode("output")
-    m.outputMaxLines = m.output.maxLines
-    m.outputLines = []
+  m.output = scene.findNode("output")
+  m.outputMaxLines = m.output.maxLines
+  m.outputLines = []
 
-    m.external_print_line = custom_print_line
-    m.external_wait_for_stdin = custom_wait_for_stdin
+  m.external_print_line = custom_print_line
+  m.external_wait_for_stdin = custom_wait_for_stdin
 
-    If settings.CustomInit <> Invalid Then
-        m.CustomInit = settings.CustomInit
-        m.CustomInit()
-    End if
+  if settings.CustomInit <> invalid then
+    m.CustomInit = settings.CustomInit
+    m.CustomInit()
+  end if
 
-    If settings.RestartOnFailure = True Then
-        While True
-            CatchingStart()
-        End While
-    Else If settings.Profiling = True Then
-        CatchingStart()
-    Else
-        Start()
-    End If
 
-    Print "------ Completed ------"
+  if settings.RestartOnFailure = True then
+    while True
+      CatchingStart()
+    end while
+  else if settings.Profiling = True then
+    CatchingStart()
+  else
+    Start()
+  end if
 
-    If settings.PauseOnExit = True Then
-        While True
-            WaitForEvent()
-        End While
-    End If
+  print "------ Completed ------"
+
+  m.isJSLoaded = false
+  if settings.PauseOnExit = True then
+    while True
+      WaitForEvent()
+    end while
+  end if
 end sub
