@@ -3,6 +3,7 @@
 #include <string>
 
 const char* intro =
+    "2.6"
     "Write JavaScript and press enter to evaluate it. "
     "Errors will abort due to unimplemented longjmp. Try:\n"
     "  9-3\n"
@@ -14,7 +15,7 @@ const char* intro =
 
 void print_top_and_pop(duk_context* ctx) {
     duk_idx_t top = duk_get_top(ctx);
-    
+
     // Try first to turn it into JSON if it's an Object, and if that fails then use String(...)
     duk_dup_top(ctx);
     const char* result = nullptr;

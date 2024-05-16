@@ -1171,8 +1171,10 @@ void CWriter::Write(const Func& func) {
   Write(CloseBrace(), "End Function");
   func_ = nullptr;
 
-  const size_t label_soft_limit = 128;
-  const size_t label_hard_limit = 256;
+  // const size_t label_soft_limit = 128;
+  const size_t label_soft_limit = 200;
+  // const size_t label_hard_limit = 256;
+  const size_t label_hard_limit = 2000;
   if (label_count_ > label_soft_limit) {
     std::cerr << "Function " << func.name << " had " << label_count_ << " labels (soft limit " << label_soft_limit << ", hard limit " << label_hard_limit << " due to BrightScript)" << std::endl;
     if (label_count_ > label_hard_limit) {
@@ -1180,10 +1182,11 @@ void CWriter::Write(const Func& func) {
     }
   }
   label_count_ = 0;
-  const size_t variable_limit = 254;
+  // const size_t variable_limit = 254;
+  const size_t variable_limit = 3000;
   const size_t variable_count = func.GetNumParamsAndLocals() + stack_var_sym_map_.size();
-  if (variable_count > 254) {
-    std::cerr << "Function " << func.name << " had " << variable_count << " variables (limit " << variable_limit << " due to BrightScript)" << std::endl;
+  if (variable_count > variable_limit) {
+    std::cerr << "HELLO Function " << func.name << " had " << variable_count << " variables (limit " << variable_limit << " due to BrightScript)" << std::endl;
     BRS_ABORT("Variable limit reached");
   }
 
@@ -1304,7 +1307,7 @@ void CWriter::Write(const ExprList& exprs) {
             indices.push_back(IndexRange(i, i));
           }
         }
-        
+
         // If we only have a default target, then just jump to it.
         if (labels_to_indices.empty()) {
           DropTypes(1);
@@ -1897,7 +1900,7 @@ void CWriter::Write(const CompareExpr& expr) {
     case Opcode::I32GeU:
       WriteCompareI32UExpr(expr.opcode, ">=");
       break;
-    
+
 
     case Opcode::I64LtU:
       WritePrefixBinaryExpr(expr.opcode, "I64LtU");
